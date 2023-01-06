@@ -1,5 +1,9 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -17,6 +21,10 @@ public class ChatClient {
     // Se for necessário adicionar variáveis ao objecto ChatClient, devem
     // ser colocadas aqui
 
+    private String server;
+    private int port;
+    SocketChannel sc;
+    ByteBuffer buffer;
 
 
     
@@ -63,26 +71,35 @@ public class ChatClient {
         // Se for necessário adicionar código de inicialização ao
         // construtor, deve ser colocado aqui
 
+        this.server = server;
+        this.port = port;
 
+        // allocate same buffer size as the server
+        this.buffer = ByteBuffer.allocate(16384);
 
     }
 
 
-    // Método invocado sempre que o utilizador insere uma mensagem
-    // na caixa de entrada
+    // User prints message onto the text box
+    // SocketChannel then send message to the server
     public void newMessage(String message) throws IOException {
-        // PREENCHER AQUI com código que envia a mensagem ao servidor
+        message = message + '\n';
 
+        // put message on buffer and switch buffer to write mode
+        buffer.put(message.getBytes());
+        buffer.flip();
+        sc.write(buffer);
 
-
+        // clear buffer to make it ready to read new messages
+        buffer.clear();
+        buffer.rewind();
     }
 
     
-    // Método principal do objecto
+    // Connect with the server throw SocketChannel
     public void run() throws IOException {
-        // PREENCHER AQUI
-
-
+        sc = SocketChannel.open();
+        ClientMessages cm = new ClientMessages(sc, chatArea);
 
     }
     
